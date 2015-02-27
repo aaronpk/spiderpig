@@ -129,7 +129,8 @@ function process_link(current) {
       // Split the path on / and remove the filename to create the directory
       components = page_url.path.split("/");
       var filename = components.pop();
-      var dirname = output_dir + "/" + components.join("/") + "/";
+      var path_components = components.join("/");
+      var dirname = output_dir + path_components + "/";
       console.log("Filename: "+filename);
       console.log("Directory: "+dirname);
 
@@ -137,26 +138,14 @@ function process_link(current) {
       fs.writeFileSync(dirname+filename, body, "utf8");
 
       var $ = cheerio.load(body);
+
       var links = $("a");
+      enqueue_links($, links, "href");
+      var css = $("link[rel=stylesheet]");
+      enqueue_links($, css, "href");
+      var js = $("script");
+      enqueue_links($, js, "src");
 
-      for(var i = 0; i < links.length; i++) {
-        var a = links[i];
-        var next_url = $(a).attr("href");
-        if(next_url) {
-          var parsed = url.parse(next_url);
-
-          if(parsed.host == null || parsed.host == host) {
-            // Ignore the query string since we can't do anything with it anyway
-            var resolved = url.resolve(base, (parsed.pathname ? parsed.pathname : "")); //+(parsed.search ? parsed.search : ""));
-            if(!visited[resolved] && queue.indexOf(resolved) == -1) {
-              console.log("queuing: "+resolved);
-              queue.push(resolved);
-            }
-          } else {
-            // console.log("skipping: "+next_url);
-          }
-        }
-      }
       ready = true;
       running--;
     }
@@ -164,3 +153,29 @@ function process_link(current) {
 
 }
 
+function enqueue_links($, links, selector) {
+  for(var i = 0; i < links.length; i++) {
+    var a = links[i];
+    var next_url = $(a).attr(selector);
+    if(next_url) {
+      // Node's url.parse doesn't properly parse URLs with no scheme
+      if(next_url.match(/^\/\//)) {
+        next_url = "http://"+next_url;
+      }
+
+      var parsed = url.parse(next_url);
+
+      // Only queue URLs on the same domain
+      if(parsed.host == null || parsed.host == host) {
+        // Ignore the query string since we can't do anything with it anyway
+        var resolved = url.resolve(base, (parsed.pathname ? parsed.pathname : "")); //+(parsed.search ? parsed.search : ""));
+        if(!visited[resolved] && queue.indexOf(resolved) == -1) {
+          console.log("queuing: "+resolved);
+          queue.push(resolved);
+        }
+      } else {
+        // console.log("skipping: "+next_url);
+      }
+    }
+  }
+}
