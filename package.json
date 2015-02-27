@@ -1,0 +1,16 @@
+{
+  "name": "Spiderpig",
+  "version": "1.0.0",
+  "description": "",
+  "main": "spider.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aaron Parecki http://aaronparecki.com",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "cheerio": "^0.18.0",
+    "fs-tools": "^0.2.11",
+    "request": "^2.53.0"
+  }
+}
