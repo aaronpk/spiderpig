@@ -96,6 +96,10 @@ function process_link(current) {
       console.log(error);
       ready = true;
       running--;
+    } else if(response.statusCode == 404) {
+      console.log("404 Not Found");
+      ready = true;
+      running--;
     } else {
 
       // Find out if we followed any redirects to get here
