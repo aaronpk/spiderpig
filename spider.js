@@ -15,8 +15,6 @@ var http_timeout = 15000;
 var base = "https://"+host+"/";
 var output_dir = "./"+host;
 
-base = "https://geoloqi.com/blog/2012/05/unleashing-the-next-generation-of-location-with-geoloqis-titanium-module/geoloqi-visual-trigger-editor-3/";
-
 var visited = {};
 var queue = [];
 var ready = true;
