@@ -9,7 +9,7 @@ You will need to copy over any assets like JS, CSS and images for now, since it 
 ## Usage
 
 ```
-./spider example.com
+./spider.js example.com
 ```
 
 This will crawl example.com, look for any links in <a> tags, and download all pages it finds to a folder called "example.com".
