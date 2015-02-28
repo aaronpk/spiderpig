@@ -79,7 +79,6 @@ function process_link(current) {
   request({
     url: current,
     timeout: http_timeout,
-    // pool: { maxSockets: 1 },
     followRedirect: function(response) {
       var redirect = url.parse(response.headers.location);
       if(redirect.host == host) {
@@ -140,7 +139,13 @@ function process_link(current) {
 
       // Write the file to disk
       fstools.mkdirSync(dirname);
-      fs.writeFileSync(dirname+filename, body, "utf8");
+      if(response.headers['content-type'] && response.headers['content-type'].match(/text/)) {
+        fs.writeFileSync(dirname+filename, body, 'utf8');
+      } else {
+        request.get(current).pipe(fs.createWriteStream(dirname+filename));
+      }
+
+        // httpreq.download(current, dirname+filename);
 
       // Now parse the file looking for other links to follow, and queue them up
       var $ = cheerio.load(body);
