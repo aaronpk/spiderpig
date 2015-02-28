@@ -12,7 +12,7 @@ var host = process.argv[2];
 
 var http_timeout = 15000;
 
-var base = "https://"+host+"/";
+var base = "http://"+host+"/";
 var output_dir = "./"+host;
 
 var visited = {};
@@ -138,17 +138,32 @@ function process_link(current) {
       console.log("Filename: "+filename);
       console.log("Directory: "+dirname);
 
+      // Write the file to disk
       fstools.mkdirSync(dirname);
       fs.writeFileSync(dirname+filename, body, "utf8");
 
+      // Now parse the file looking for other links to follow, and queue them up
       var $ = cheerio.load(body);
 
-      var links = $("a");
-      enqueue_links($, links, "href");
-      var css = $("link[rel=stylesheet]");
-      enqueue_links($, css, "href");
-      var js = $("script");
-      enqueue_links($, js, "src");
+      if(response.headers['content-type'] && response.headers['content-type'].match(/css/)) {
+        response.body.replace(/url\(([^\)]+)\)/g, function(a,u) {
+          // resolve the URL relative to the stylesheet
+          u = url.resolve(current, u); 
+          enqueue_link(u);
+        });
+      } else if(response.headers['content-type'] && response.headers['content-type'].match(/javascript/)) {
+
+      } else {
+        // assume HTML if it's not JS or CSS
+        var links = $("a");
+        enqueue_links($, links, "href");
+        var css = $("link[rel=stylesheet]");
+        enqueue_links($, css, "href");
+        var js = $("script");
+        enqueue_links($, js, "src");
+        var img = $("img");
+        enqueue_links($, img, "src");
+      }
 
       ready = true;
       running--;
@@ -167,19 +182,24 @@ function enqueue_links($, links, selector) {
         next_url = "http://"+next_url;
       }
 
-      var parsed = url.parse(next_url);
-
-      // Only queue URLs on the same domain
-      if(parsed.host == null || parsed.host == host) {
-        // Ignore the query string since we can't do anything with it anyway
-        var resolved = url.resolve(base, (parsed.pathname ? parsed.pathname : "")); //+(parsed.search ? parsed.search : ""));
-        if(!visited[resolved] && queue.indexOf(resolved) == -1) {
-          console.log("queuing: "+resolved);
-          queue.push(resolved);
-        }
-      } else {
-        // console.log("skipping: "+next_url);
-      }
+      enqueue_link(next_url);
     }
   }
+}
+
+function enqueue_link(link) {
+  var parsed = url.parse(link);
+
+  // Only queue URLs on the same domain
+  if(parsed.host == null || parsed.host == host) {
+    // Ignore the query string since we can't do anything with it anyway
+    var resolved = url.resolve(base, (parsed.pathname ? parsed.pathname : "")); //+(parsed.search ? parsed.search : ""));
+    if(!visited[resolved] && queue.indexOf(resolved) == -1) {
+      console.log("queuing: "+resolved);
+      queue.push(resolved);
+    }
+  } else {
+    // console.log("skipping: "+next_url);
+  }
+
 }
