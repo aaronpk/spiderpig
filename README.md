@@ -3,7 +3,7 @@ Spiderpig
 
 Spiderpig is a website crawler designed to archive your own sites as flat HTML files. It works great for Wordpress or other dynamic sites, collapsing the site into a folder of HTML files.
 
-You will need to copy over any assets like JS, CSS and images for now, since it only looks for pages linked to in &lt;a&gt; tags.
+It also fetches images, Javascript and CSS files that are linked from any HTML pages or even other CSS files. However any content loaded via Javascript won't be discovered by the script.
 
 
 ## Usage
