@@ -103,7 +103,7 @@ function process_link(current) {
 
       // Find out if we followed any redirects to get here
       var redirect_from = current;
-      if(response.request.redirects.length > 0) {
+      if(response.request.redirects && response.request.redirects.length > 0) {
         // Write each redirect to the file
         for(var i=0; i<response.request.redirects.length; i++) {
           var r = response.request.redirects[i];
