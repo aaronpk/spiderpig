@@ -117,10 +117,14 @@ function process_link(current) {
 
       var page_url = url.parse(current);
 
-      // Add a slash if the path is not a file (does not end in a slash and does not have a dot)
-      var components = page_url.path.split("/");
-      if(!page_url.path.match(/\/$/) && !components[components.length-1].match(/\./)) {
+      if(response.headers['content-type'] && response.headers['content-type'].match(/image/)) {
+        console.log("not making this a directory: "+response.headers['content-type'])
+      } else {
+        // Add a slash if the path is not a file (does not end in a slash and does not have a dot)
+        var components = page_url.path.split("/");
+        if(!page_url.path.match(/\/$/) && !components[components.length-1].match(/\./)) {
         page_url.path += "/";
+        }
       }
 
       // Add "index.html" if the path ends in a slash
